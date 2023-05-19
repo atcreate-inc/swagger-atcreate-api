@@ -19,7 +19,7 @@ paths:
   /login:
     post:
       tags:
-        - default
+        - Authentication
       summary: POST /login
       requestBody:
         content:
@@ -39,7 +39,7 @@ paths:
   /device-configs:
     get:
       tags:
-        - default
+        - Protected
       summary: GET /device-configs
       parameters:
         - name: all
@@ -65,7 +65,7 @@ paths:
   /devices:
     get:
       tags:
-        - default
+        - Protected
       summary: GET /devices
       parameters:
         - name: formatted
@@ -81,7 +81,7 @@ paths:
   /healthcheck:
     get:
       tags:
-        - default
+        - Protected
       summary: GET /healthcheck
       responses:
         "200":
@@ -91,7 +91,7 @@ paths:
   /sensor-depth:
     get:
       tags:
-        - default
+        - Protected
       summary: GET /sensor-depth
       parameters:
         - name: sensorId
@@ -112,7 +112,7 @@ paths:
   /sensor-readings:
     get:
       tags:
-        - default
+        - Protected
       summary: GET /sensor-readings
       parameters:
         - name: sigfoxId
@@ -125,6 +125,11 @@ paths:
           schema:
             type: integer
           example: "5000"
+        - name: fromTimestamp
+          in: query
+          schema:
+            type: integer
+          example: "1647035926"
       responses:
         "200":
           description: Successful response

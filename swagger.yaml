@@ -124,7 +124,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: "5000"
+          example: "1000"
         - name: fromTimestamp
           in: query
           schema:

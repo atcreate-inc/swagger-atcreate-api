@@ -2,12 +2,12 @@
 openapi: 3.0.0
 info:
   title: AtCreate API
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: https://atcreate-api.azurewebsites.net/api/
 components:
   securitySchemes:
-    noauthAuth:
+    noAuth:
       type: http
       scheme: noauth
     bearerAuth:
@@ -18,9 +18,9 @@ security:
 paths:
   /login:
     post:
-      tags:
-        - Authentication
-      summary: POST /login
+      tags: [ Authentication ]
+      summary: Authenticate.
+      description: This endpoint allows users to authenticate to the API. JWT authorization tokens returned are used for accessing protected resources.  This endpoint must be called before calling protected endpoints.  The JWT authorization token returned must be used when calling protected API endpoints.
       requestBody:
         content:
           application/json:
@@ -30,7 +30,22 @@ paths:
                 email: test@email.com
                 password: some-secure-password
       security:
-        - noauthAuth: []
+        - noAuth: []
+      responses:
+        "200":
+          description: Successful response
+  /devices:
+    get:
+      tags: [ Protected ]
+      summary: GET /devices
+      parameters:
+        - name: formatted
+          description: This formats response in a different style.
+          required: false
+          in: query
+          schema:
+            type: boolean
+          example: "true"
       responses:
         "200":
           description: Successful response
@@ -38,21 +53,27 @@ paths:
             application/json: {}
   /device-configs:
     get:
-      tags:
-        - Protected
-      summary: GET /device-configs
+      tags: [ Protected ]
+      summary: Get RIC device configurations.
+      description: Retrieves configuration information for RIC devices.  RIC are typically configured in the field using the Ricster iOS App.  RIC configuration information is transmitted to our backend on RIC reboot.  This endpoint retrieves the RIC's configuration.
       parameters:
-        - name: all
-          in: query
-          schema:
-            type: boolean
-          example: "true"
         - name: sigfoxId
+          description: SigfoxId is RIC's Id.  These can be obtained from `GET /devices` endpoint.
+          required: true
           in: query
           schema:
             type: string
           example: 7F64BE
+        - name: all
+          description: This will return all current and past RIC configurations.
+          required: false
+          in: query
+          schema:
+            type: boolean
+          example: "true"
         - name: formatted
+          description: This formats response in a different style.
+          required: false
           in: query
           schema:
             type: boolean
@@ -60,72 +81,55 @@ paths:
       responses:
         "200":
           description: Successful response
-          content:
-            application/json: {}
-  /devices:
-    get:
-      tags:
-        - Protected
-      summary: GET /devices
-      parameters:
-        - name: formatted
-          in: query
-          schema:
-            type: boolean
-          example: "true"
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json: {}
-  /healthcheck:
-    get:
-      tags:
-        - Protected
-      summary: GET /healthcheck
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json: {}
+        "401":
+          description: "Unauthorized: Invalid or missing JWT token."
+
   /sensor-depth:
     get:
-      tags:
-        - Protected
-      summary: GET /sensor-depth
+      tags: [ Protected ]
+      summary: Get Sensor Position (or Depth)
+      description: Retrieve RIC's sensor depth.  RIC's can have up to 6 sensors.  `sensorId` is used to specify which sensor depth is being retrieved.
       parameters:
+        - name: sigfoxId
+          description: SigfoxId is RIC's Id.  These can be obtained from `GET /devices` endpoint.
+          required: true
+          in: query
+          schema:
+            type: string
+          example: 7F64BE
         - name: sensorId
+          description: RIC's Sensor Id.  RICs support 6 sensors.  Valid values are 1 to 6.
           in: query
           schema:
             type: integer
           example: "1"
-        - name: sigfoxId
-          in: query
-          schema:
-            type: string
-          example: 7F64BE
       responses:
         "200":
           description: Successful response
-          content:
-            application/json: {}
+        "401":
+          description: "Unauthorized: Invalid or missing JWT token."
+
   /sensor-readings:
     get:
-      tags:
-        - Protected
-      summary: GET /sensor-readings
+      tags: [ Protected ]
+      summary: Get Sensor readings.
+      description: Retrieves sensor data readings.  Data is returned in JSON structure for all sensors (including temperature and battery readings).  The data is returned in key/value pairs, where key is the unix timestamp and value is the sensor reading.  Reading interval depends on RIC sampling rate configuration (typically 15 min, but can vary depending between 1 and 120 on the application).  In order to get a faster response, it is recommended to keep the `limit` to 1000 or lower.  The best way to retrieve data is in batches calling this endpoint multiple times.  Use the `fromTimestamp` of the last record obtained to retrieve the next batch of records.
       parameters:
         - name: sigfoxId
+          description: SigfoxId is RIC's Id.  These can be obtained from `GET /devices` endpoint.
+          required: true
           in: query
           schema:
             type: string
           example: 7F6BC2
         - name: limit
+          description: Limit of how many data points to return.  1000 is ideal for fast response.  If requesting more than 1000, response times can be long.
           in: query
           schema:
             type: integer
           example: "1000"
         - name: fromTimestamp
+          description: The timestamp to get data points from.  When grabbing many data points, this is used in combination with `limit` to get the next batch of data points.
           in: query
           schema:
             type: integer
@@ -133,5 +137,16 @@ paths:
       responses:
         "200":
           description: Successful response
-          content:
-            application/json: {}
+        "401":
+          description: "Unauthorized: Invalid or missing JWT token."
+
+  /healthcheck:
+    get:
+      tags: [ Utility ]
+      summary: Healthcheck.
+      description: Used to determine if the API is healthy and operational.  Useful for checking connectivity.
+      security:
+        - noAuth: []
+      responses:
+        "200":
+          description: Successful response

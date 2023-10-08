@@ -59,7 +59,7 @@ paths:
       description: Retrieves configuration information for RIC devices.  RIC are typically configured in the field using the Ricster iOS App.  RIC configuration information is transmitted to our backend on RIC reboot.  This endpoint retrieves the RIC's configuration.
       parameters:
         - name: sigfoxId
-          description: SigfoxId is RIC's Id.  These can be obtained from `GET /devices` endpoint.
+          description: RIC's `sigfoxId`.  These can be obtained from `GET /devices` endpoint.
           required: true
           in: query
           schema:
@@ -92,7 +92,7 @@ paths:
       description: Retrieve RIC's sensor depth.  RIC's can have up to 6 sensors.  `sensorId` is used to specify which sensor depth is being retrieved.
       parameters:
         - name: sigfoxId
-          description: SigfoxId is RIC's Id.  These can be obtained from `GET /devices` endpoint.
+          description: RIC's `sigfoxId`.  These can be obtained from `GET /devices` endpoint.
           required: true
           in: query
           schema:
@@ -117,7 +117,7 @@ paths:
       description: Retrieves sensor data readings.  Data is returned in JSON structure for all sensors (including temperature and battery readings).  The data is returned in key/value pairs, where key is the unix timestamp and value is the sensor reading.  Reading interval depends on RIC sampling rate configuration (typically 15 min, but can vary depending between 1 and 120 on the application).  In order to get a faster response, it is recommended to keep the `limit` to 1000 or lower.  The best way to retrieve data is in batches calling this endpoint multiple times.  Use the `fromTimestamp` of the last record obtained to retrieve the next batch of records.
       parameters:
         - name: sigfoxId
-          description: SigfoxId is RIC's Id.  These can be obtained from `GET /devices` endpoint.
+          description: RIC's `sigfoxId`.  These can be obtained from `GET /devices` endpoint.
           required: true
           in: query
           schema:
